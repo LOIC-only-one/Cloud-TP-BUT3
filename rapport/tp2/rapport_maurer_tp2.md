@@ -67,7 +67,7 @@ Cette séparation permet de renforcer la sécurité en ne laissant passer que le
 
 #### Configuration du nom de domaine
 
-J'ai créé un sous-domaine sur DuckDNS.org (api-maurer.duckdns.org) pointant vers mon IP publique 40.66.42.255. La propagation DNS a pris environ 2 minutes.
+Nous avons créé un sous-domaine sur DuckDNS.org (api-maurer.duckdns.org) pointant vers mon IP publique 40.66.42.255. La propagation DNS a pris environ 2 minutes.
 
 ![image-20260112131753842](/home/id00l/.var/app/io.typora.Typora/config/Typora/typora-user-images/image-20260112131753842.png)
 
@@ -75,7 +75,7 @@ Nous voyons bien que le sous-domaine pointe vers l'IP publique de la VM Azure.
 
 #### Mise en place du certificat SSL
 
-Le réseau de l'IUT bloque les connexions HTTP vers des IP publiques. J'ai donc généré un certificat SSL auto-signé pour passer en HTTPS.
+Le réseau de l'IUT bloque les connexions HTTP vers des IP publiques. nous avons donc généré un certificat SSL auto-signé pour passer en HTTPS.
 
 ![image-20260112130912377](/home/id00l/.var/app/io.typora.Typora/config/Typora/typora-user-images/image-20260112130912377.png)
 
@@ -141,7 +141,7 @@ Ces vérifications attestent du bon fonctionnement du service web déployé sur 
 
 ## Section 2 : Déploiement On-premise avec Proxmox
 
-J'ai installé Proxmox 9.0 sur une machine disposant de 16 Go de RAM et 8 vCPU. Le disque système fait 10 Go et celui pour les VMs 100 Go.
+Nous avons installé Proxmox 9.0 sur une machine disposant de 16 Go de RAM et 8 vCPU. Le disque système fait 10 Go et celui pour les VMs 100 Go.
 
 Étapes réalisées : upload de l'ISO Debian, création de la VM, connexion SSH, passage root, nettoyage du sources.list, mise à jour des paquets, installation et activation d'Apache2. L'ensemble a pris environ 10 minutes, sans difficulté particulière.
 
@@ -231,7 +231,7 @@ En conclusion, pour des besoins de performance immédiate et un contrôle préci
 | Complexité | Simple | Moyenne | Cloud Public |
 | Contrôle infrastructure | Limité | Total | Cloud Privé |
 | Scalabilité | Rapide | Lente | Cloud Public |
-| Documentation | Complète (Microsoft) | Forum communautaire | Cloud Public |
+| Documentation | Support (Microsoft) | Forum communautaire | Cloud Public |
 | Coût initial | 0€ | ~50€ matériel | Cloud Public |
 | Coût mensuel | 20-50€ | 5-10€ | Cloud Privé |
 | Configuration réseau | Moyenne | Simple | Cloud Privé |
@@ -242,7 +242,7 @@ En conclusion, pour des besoins de performance immédiate et un contrôle préci
 
 Pour le cloud public (Azure), il n’y a pas d’investissement matériel initial à prévoir. Le coût mensuel pour une machine virtuelle Ubuntu, incluant le stockage, les transferts et la gestion du DNS, s’élève à environ 32 €. Sur une période de cinq ans, cela représente un total de 1 920 €.
 
-En ce qui concerne le cloud privé (Proxmox), il faut compter un investissement de départ d’environ 3 200 € pour l’achat du serveur, du switch et de l’onduleur. À cela s’ajoutent des coûts mensuels estimés à 92 €, couvrant l’électricité, l’accès à Internet et la maintenance, soit un total de 8 720 € sur cinq ans.
+En ce qui concerne le cloud privé (Proxmox), il faut compter un investissement de départ, si on prend un exemple environ 3 200 € pour l’achat du serveur, du switch et de l’onduleur. À cela s’ajoutent des coûts mensuels estimés à 92 €, couvrant l’électricité, l’accès à Internet et la maintenance, soit un total de 8 720 € sur cinq ans.
 
 Ainsi, pour une petite infrastructure, le cloud public s’avère plus économique sur la durée de cinq ans.
 
