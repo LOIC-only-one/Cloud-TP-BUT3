@@ -1,0 +1,99 @@
+/usr/lib/python3/dist-packages/paramiko/pkey.py:82: CryptographyDeprecationWarning: TripleDES has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.TripleDES and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.
+  "cipher": algorithms.TripleDES,
+/usr/lib/python3/dist-packages/paramiko/transport.py:237: CryptographyDeprecationWarning: Blowfish has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.Blowfish and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 45.0.0.
+  "class": algorithms.Blowfish,
+/usr/lib/python3/dist-packages/paramiko/transport.py:261: CryptographyDeprecationWarning: TripleDES has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.TripleDES and will be removed from cryptography.hazmat.primitives.ciphers.algorithms in 48.0.0.
+  "class": algorithms.TripleDES,
+
+PLAY [Configure web servers with Nginx] ****************************************
+
+TASK [Gathering Facts] *********************************************************
+[WARNING]: Platform linux on host web-technova-2 is using the discovered Python
+interpreter at /usr/bin/python3.10, but future installation of another Python
+interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-
+core/2.17/reference_appendices/interpreter_discovery.html for more information.
+[WARNING]: Platform linux on host web-technova-1 is using the discovered Python
+interpreter at /usr/bin/python3.10, but future installation of another Python
+interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-
+core/2.17/reference_appendices/interpreter_discovery.html for more information.
+ok: [web-technova-2]
+ok: [web-technova-1]
+
+TASK [Display deployment info] *************************************************
+ok: [web-technova-1] => {
+    "msg": "Déploiement vers web-technova-1\nIP : 10.0.1.73\nOS : Ubuntu 22.04\n"
+}
+ok: [web-technova-2] => {
+    "msg": "Déploiement vers web-technova-2\nIP : 10.0.1.74\nOS : Ubuntu 22.04\n"
+}
+
+TASK [Update APT cache] ********************************************************
+ok: [web-technova-2]
+ok: [web-technova-1]
+
+TASK [Install Nginx] ***********************************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Install curl (for health checks)] ****************************************
+ok: [web-technova-2]
+ok: [web-technova-1]
+
+TASK [Create application directory] ********************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Deploy index.html] *******************************************************
+ok: [web-technova-2]
+ok: [web-technova-1]
+
+TASK [Deploy Nginx configuration] **********************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Enable devcloud site] ****************************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Disable default site] ****************************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Flush handlers] **********************************************************
+
+TASK [Flush handlers] **********************************************************
+
+TASK [Start and enable Nginx] **************************************************
+ok: [web-technova-2]
+ok: [web-technova-1]
+
+TASK [Wait for Nginx to be ready] **********************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Test HTTP response] ******************************************************
+ok: [web-technova-1]
+ok: [web-technova-2]
+
+TASK [Display health check result] *********************************************
+ok: [web-technova-1] => {
+    "msg": "✓ Health check PASSED\nStatus: 200\nURL: http://web-technova-1/\n"
+}
+ok: [web-technova-2] => {
+    "msg": "✓ Health check PASSED\nStatus: 200\nURL: http://web-technova-2/\n"
+}
+
+TASK [Deployment summary] ******************************************************
+ok: [web-technova-1] => {
+    "msg": "✅ Déploiement réussi !\n\nAccédez à : http://10.0.1.73/\nSSH : ssh -i ~/.ssh/id_rsa ubuntu@10.0.1.73"
+}
+ok: [web-technova-2] => {
+    "msg": "✅ Déploiement réussi !\n\nAccédez à : http://10.0.1.74/\nSSH : ssh -i ~/.ssh/id_rsa ubuntu@10.0.1.74"
+}
+
+PLAY RECAP *********************************************************************
+web-technova-1             : ok=15   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+web-technova-2             : ok=15   changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

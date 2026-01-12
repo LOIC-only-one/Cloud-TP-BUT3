@@ -1,0 +1,209 @@
+---
+- name: Configure web servers with Nginx
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  vars:
+    nginx_port: 80
+    app_dir: /var/www/devcloud
+    app_user: www-data
+
+  pre_tasks:
+    - name: Display deployment info
+      debug:
+        msg: |
+          Déploiement vers {{ inventory_hostname }}
+          IP : {{ ansible_default_ipv4.address }}
+          OS : {{ ansible_distribution }} {{ ansible_distribution_version }}
+
+  tasks:
+    # ========== SYSTEM ==========
+
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Install curl (for health checks)
+      apt:
+        name: curl
+        state: present
+
+    # ========== DIRECTORIES ==========
+
+    - name: Create application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0755'
+
+    # ========== DEPLOY APPLICATION ==========
+
+    - name: Deploy index.html
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>TechNova - Phase 2</title>
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+              }
+              .container {
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                padding: 40px;
+                max-width: 600px;
+                text-align: center;
+              }
+              h1 {
+                color: #333;
+                margin-bottom: 20px;
+              }
+              .info-box {
+                background: #f8f9fa;
+                border-left: 4px solid #667eea;
+                padding: 20px;
+                margin: 20px 0;
+                text-align: left;
+                border-radius: 5px;
+              }
+              .label {
+                font-weight: bold;
+                color: #667eea;
+              }
+              .badge {
+                display: inline-block;
+                background: #667eea;
+                color: white;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-size: 0.9em;
+                margin-top: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🚀 TechNova Phase 2</h1>
+              <h2 style="color: #666; font-size: 1.1em; margin-bottom: 30px;">Infrastructure as Code</h2>
+              
+              <div class="info-box">
+                <p><span class="label">Serveur :</span> {{ ansible_hostname }}</p>
+                <p><span class="label">IP Privée :</span> {{ ansible_default_ipv4.address }}</p>
+                <p><span class="label">OS :</span> {{ ansible_distribution }} {{ ansible_distribution_version }}</p>
+              </div>
+
+              <p style="margin-top: 30px; color: #666;">
+                Cette page a été déployée automatiquement avec Terraform + Ansible
+              </p>
+              <span class="badge">✓ Nginx est opérationnel</span>
+            </div>
+          </body>
+          </html>
+        dest: "{{ app_dir }}/index.html"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: '0644'
+      notify: restart nginx
+
+    # ========== NGINX CONFIG ==========
+
+    - name: Deploy Nginx configuration
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/devcloud
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes
+      notify: restart nginx
+
+    - name: Enable devcloud site
+      file:
+        src: /etc/nginx/sites-available/devcloud
+        dest: /etc/nginx/sites-enabled/devcloud
+        state: link
+        force: yes
+      notify: restart nginx
+
+    - name: Disable default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: restart nginx
+
+    # Force handlers to run now (restart nginx before tests)
+    - name: Flush handlers
+      meta: flush_handlers
+
+    # ========== SERVICES ==========
+
+    - name: Start and enable Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+        daemon_reload: yes
+
+    # ========== HEALTH CHECKS ==========
+
+    - name: Wait for Nginx to be ready
+      wait_for:
+        port: "{{ nginx_port }}"
+        delay: 2
+        timeout: 10
+
+    - name: Test HTTP response
+      uri:
+        url: "http://localhost:{{ nginx_port }}/"
+        status_code: 200
+      register: http_test
+      retries: 3
+      delay: 2
+
+    - name: Display health check result
+      debug:
+        msg: |
+          ✓ Health check PASSED
+          Status: {{ http_test.status }}
+          URL: http://{{ inventory_hostname }}/
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+        daemon_reload: yes
+
+  post_tasks:
+    - name: Deployment summary
+      debug:
+        msg: |
+          ✅ Déploiement réussi !
+          
+          Accédez à : http://{{ ansible_default_ipv4.address }}/
+          SSH : ssh -i ~/.ssh/id_rsa ubuntu@{{ ansible_default_ipv4.address }}
