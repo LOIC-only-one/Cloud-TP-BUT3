@@ -652,7 +652,7 @@ curl -k -X POST https://pizza-api.local/order \
 ```
 
 ![alt text](images/image10.png)
-**Note :** Le flag `-k` permet d'ignorer la vérification du certificat auto-signé. En production, avec un certificat valide (Let's Encrypt), ce flag n'est pas nécessaire.
+**Note :** Le flag `-k` permet d'ignorer la vérification du certificat auto-signé. En prod, avec un certificat valide (Let's Encrypt), ce flag n'est pas nécessaire.
 
 #### Vérification de l'état du déploiement
 
