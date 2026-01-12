@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pizza-api-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - pizza-api.local
+      secretName: pizza-tls-secret
+  rules:
+    - host: pizza-api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pizza-api-service
+                port:
+                  number: 80

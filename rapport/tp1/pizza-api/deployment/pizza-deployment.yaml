@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pizza-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pizza-api
+  template:
+    metadata:
+      labels:
+        app: pizza-api
+    spec:
+      containers:
+        - name: pizza-api
+          image: pizza-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          # Injection des variables d'environnement depuis ConfigMap
+          envFrom:
+            - configMapRef:
+                name: pizza-api-config
+          # Injection des secrets
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pizza-api-secret
+                  key: API_KEY
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: pizza-api-secret
+                  key: DB_CONNECTION_STRING
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pizza-api-service
+spec:
+  selector:
+    app: pizza-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pizza-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pizza-api-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
