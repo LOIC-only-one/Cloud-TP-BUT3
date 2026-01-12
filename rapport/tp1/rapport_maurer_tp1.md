@@ -659,14 +659,9 @@ curl -k -X POST https://pizza-api.local/order \
 ```bash
 # Vérifier les pods
 kubectl get pods -l app=pizza-api
-# NAME                                    READY   STATUS    RESTARTS   AGE
-# pizza-api-deployment-747bb6876f-hgxrr   1/1     Running   0          27m
-
-# Vérifier l'Ingress
 kubectl get ingress pizza-api-ingress
-# NAME                CLASS   HOSTS             ADDRESS        PORTS     AGE
-# pizza-api-ingress   nginx   pizza-api.local   192.168.49.2   80, 443   28m
 ```
+![alt text](images/image11.png)
 
 ### 8.8 Vérification de la sécurité
 
@@ -710,3 +705,5 @@ kubectl get hpa pizza-api-hpa -w
 | **Élasticité** | HPA configuré | HPA + metrics observées + optimisations |
 | **Sécurité** | HTTP, secrets hardcodés | HTTPS obligatoire, Secrets Manager K8s, certificat TLS, utilisateur non-root |
 
+
+### Lien du github : https://github.com/LOIC-only-one/Cloud-TP-BUT3/tree/main/rapport/tp1
