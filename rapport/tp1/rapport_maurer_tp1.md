@@ -5,7 +5,7 @@ Dans ce premier TP, nous avons exploré le déploiement d'un microservice conten
 
 ## Section 2 : Préparation de l'environnement
 
-N'aillant pas de crédit GCP, j'ai décidé de monter un cluster mono node minikube en local sur ma machine. J'ai installé Minikube et kubectl, puis j'ai démarré le cluster avec la commande `minikube start`.
+N'aillant pas de crédit GCP, nous avons décidé de monter un cluster mono node minikube en local sur nos machines. Nous avons donc installé Minikube et kubectl, puis nous avons démarré le cluster avec la commande `minikube start`.
 
 Installation de docker : 
 
@@ -39,8 +39,6 @@ Lancement du cluster :
 minikube start --driver=docker
 ```
 
-![alt text](images/image.png)
-
 ## Section 3 : Développement du microservice
 
 Nous avons suivis les instructions du TP pour créer un microservice simple en Python utilisant Flask. Le code source du microservice est le suivant :
@@ -72,20 +70,17 @@ Et l'index.js :
 const express = require('express');
 const app = express();
 
-// PORT injecté par env (Facteur III 12-Factor)
 // Default 8080 si env vide (Cloud Run injecte PORT=8080)
 const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
-
-// Logger simple stdout (Facteur XI 12-Factor)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
 });
 
-// Route santé (healthcheck Cloud Run)
+// Route (healthcheck Cloud Run)
 app.get('/', (req, res) => {
   res.json({
     status: 'ok',
@@ -123,18 +118,16 @@ app.post('/order', (req, res) => {
   });
 });
 
-// Gestion erreurs 404
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Démarrage serveur
 app.listen(port, () => {
   console.log(`[STARTUP] Pizza-Tech API listening on port ${port}`);
   console.log(`[STARTUP] Health check: GET http://localhost:${port}/`);
 });
 
-// Graceful shutdown (Facteur IX 12-Factor)
+// Gestion de la fermture de l'application (Facteur IX 12-Factor)
 process.on('SIGTERM', () => {
   console.log('[SHUTDOWN] SIGTERM received, closing gracefully...');
   process.exit(0);
@@ -155,24 +148,14 @@ Et on lance des requêtes curl pour tester les endpoints :
 
 ```bash
 curl http://localhost:8080/
-
-# Résultat :
-# {
-#   "status": "ok",
-#   "service": "Pizza-Tech API v1.0",
-#   "timestamp": "2024-06-10T12:34:56.789Z"
-# }
+# {"status": "ok","service": "Pizza-Tech API v1.0","timestamp": "2024-06-10T12:34:56.789Z"}
 
 curl http://localhost:8080/menu
-
-# Résultat :
 #[{"id":1,"name":"Margherita","price":12.99},{"id":2,"name":"Pepperoni","price":14.99},{"id":3,"name":"Veggie","price":13.99},{"id":4,"name":"Quattro Formaggi","price":15.99}]
 
 curl -X POST http://localhost:8080/order \
     -H "Content-Type: application/json" \
     -d '{"pizzaId":1,"quantity":2,"address":"123 Rue de la Paix"}'
-
-# Résultat :
 #{"orderId":"hfd84p","status":"confirmed","estimatedDelivery":"30 minutes"}
 ```
 Et on voit les call api dans les logs :
@@ -289,6 +272,10 @@ kubectl apply -f deployment/pizza-deployment.yaml
 On voit que le pod est bien créé et en cours d'exécution :
 ![alt text](images/image4.png)
 
+A cette étape, nous avions donc une API exposée sur l'interface WAN du noeud minikube, l'api est accessible : http://192.168.49.2:30080
+
+
+
 ## Section 7 : Démonstration de l'elasticité et de la scalabilité
 
 Afin de démontrer la scalabilité nous allons modifier le micro service de la manière suivante :
@@ -369,6 +356,8 @@ On applique le nouveau déploiement avec l'HPA :
 kubectl apply -f deployment/pizza-deployment.yaml
 ```
 
+Afin de vérifier le bon fonctionnement du HPA, nous avons utilisons les méthodes suivantes :
+
 Terminal 1 : Générateur de trafic simple avec bash
 Pour générer du trafic en parallèle et tester la scalabilité, vous pouvez utiliser le script suivant qui lance plusieurs processus curl en arrière-plan :
 
@@ -376,7 +365,7 @@ Pour générer du trafic en parallèle et tester la scalabilité, vous pouvez ut
 #!/bin/bash
 # Génère du trafic parallèle vers l'API /menu
 
-PARALLEL=10  # Nombre de processus parallèles
+PARALLEL=10  # Nombre de processus asynchrone
 
 for i in $(seq 1 $PARALLEL); do
     while true; do
@@ -398,11 +387,15 @@ ab -n 1000 -c 50 http://192.168.49.2:30080/menu
 ```
 ![alt text](images/image5.png)
 
-## Section 8 : Amélioration de la sécurité et de la configuration (Niveau Expert)
+## Section 8 : Amélioration de la sécurité et de la configuration
 
 ### 8.1 Externalisation complète de la configuration (12-Factor App - Facteur III)
 
-Pour atteindre le niveau expert, nous avons complètement externalisé la configuration de l'application. Toutes les valeurs configurables sont maintenant gérées via des variables d'environnement.
+Pour atteindre le niveau max de la notation, nous avons complètement externalisé la configuration de l'application. Toutes les valeurs configurables sont maintenant gérées via des variables d'environnement.
+
+####  Fichier .env contenant les variables d'environnements  
+
+![image-20260112120454137](/home/id00l/.var/app/io.typora.Typora/config/Typora/typora-user-images/image-20260112120454137.png)
 
 #### Code mis à jour (index.js)
 
@@ -508,14 +501,12 @@ spec:
 ```
 
 **Fonctionnalités :**
-- HTTPS obligatoire (redirection automatique HTTP → HTTPS)
-- Certificat TLS stocké dans un Secret Kubernetes
-- Isolation réseau via ClusterIP
-- Gestion centralisée du trafic via Ingress
+
+HTTPS obligatoire (redirection automatique HTTP → HTTPS | Certificat TLS stocké dans un Secret Kubernetes | solation réseau via ClusterIP | Gestion centralisée du trafic via Ingress
 
 #### Génération du certificat TLS
 
-Pour le développement local, un certificat auto-signé est généré automatiquement :
+Pour le développement local, un certificat auto-signé est généré via OPENSSL :
 
 ```bash
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -530,7 +521,7 @@ kubectl create secret tls pizza-tls-secret \
 
 #### Scan de sécurité
 
-Le build inclut automatiquement un audit de sécurité :
+Le build inclut automatiquement un audit de sécurité, on peut également utiliser Trivy mais dans le projet il n'est pas deployé :
 
 ```bash
 npm audit --audit-level=high --production
@@ -599,8 +590,6 @@ spec:
 
 ### 8.6 Procédure de redéploiement
 
-Le script affiche automatiquement les informations de connexion.
-
 #### Option 1 : Déploiement manuel (étape par étape)
 
 ```bash
@@ -652,6 +641,7 @@ curl -k -X POST https://pizza-api.local/order \
 ```
 
 ![alt text](images/image10.png)
+
 **Note :** Le flag `-k` permet d'ignorer la vérification du certificat auto-signé. En prod, avec un certificat valide (Let's Encrypt), ce flag n'est pas nécessaire.
 
 #### Vérification de l'état du déploiement
