@@ -1,7 +1,14 @@
+## Rapport de TP3 - TechNova - Infrastructure as Code avec Terraform et Ansible
 
-## PRÉ-REQUIS
+Nous allons détailler dans ce rapport les étapes suivies pour réaliser le TP3 de TechNova, qui consiste à déployer et configurer une infrastructure cloud sur AWS en utilisant Terraform pour le provisionnement et Ansible pour l'automatisation de la configuration.
+
+### PRÉ-REQUIS
 
 Avant de commencer on doit installer les outils nécessaires pour la réalisation de ce TP.:
+- Terraform
+- Ansible
+- AWS CLI
+- Git
 
 ### Installation des outils
 
