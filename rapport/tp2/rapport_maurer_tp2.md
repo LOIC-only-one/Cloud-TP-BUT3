@@ -257,3 +257,5 @@ Pour une jeune entreprise comme FastFood-AI, le cloud public est plus adapté ca
 - Haute disponibilité garantie
 
 Le cloud privé devient intéressant quand l'entreprise grandit et a besoin de plus de contrôle sur ses données, ou si elle dispose déjà d'un datacenter.
+
+Lien du repository GitHub : https://github.com/LOIC-only-one/Cloud-TP-BUT3/tree/main/rapport/tp2

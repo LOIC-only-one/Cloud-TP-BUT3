@@ -685,3 +685,5 @@ url: "http://localhost:{{ nginx_port }}/"
 ![alt text](images/image-15.png)
 
 Les logs d'executions sont dans le fichier `deployment_log.txt`.
+
+Lien du repository GitHub : https://github.com/LOIC-only-one/Cloud-TP-BUT3/tree/main/rapport/tp3
